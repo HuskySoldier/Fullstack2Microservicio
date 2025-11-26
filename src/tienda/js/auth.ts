@@ -47,7 +47,7 @@ function resolveTiendaIndex(): string {
   const p = location.pathname.replace(/\\/g,'/');
   if (p.includes('/tienda/pages/')) return '../index.html';
   if (p.includes('/tienda/')) return 'index.html';
-  return '/tienda/index.html';
+  return '/index.html';
 }
 
 async function loginUser(): Promise<void> {

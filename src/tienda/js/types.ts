@@ -1,28 +1,34 @@
 // src/tienda/js/types.ts
 
+// Interfaz de Usuario (Coincide con User.java)
 export interface User {
+  id?: number;
   run?: string;
   nombre: string;
   apellidos?: string;
   email: string;
-  pass?: string; // Opcional porque no siempre la recibimos del back
+  pass?: string; // Opcional: no siempre viaja desde el back
   fnac?: string;
   rol?: 'Administrador' | 'Vendedor' | 'Cliente';
   region?: string;
   comuna?: string;
   dir?: string;
+  telefono?: string;
 }
 
+// Interfaz de Producto (Coincide con Product.java)
 export interface Product {
-  id: number; // El backend usa Integer, no string
+  id: number;      // Long en Java -> number en TS
   nombre: string;
-  precio: number;
+  precio: number;  // Integer/Double en Java -> number en TS
   stock: number;
   img: string;
-  tipo?: string;
-  features?: string[]; // Asegúrate que el backend envíe esto o manéjalo opcional
+  descripcion?: string; // Agregado: Usado en detalles
+  tipo?: string;   // "Producto", "Plan", etc.
+  features?: string[]; // Opcional: Para listas de características en el front
 }
 
+// Interfaz para Blogs (Frontend)
 export interface Blog {
   id: string;
   titulo: string;
@@ -33,38 +39,45 @@ export interface Blog {
   img: string;
 }
 
-// DTO para respuesta del LoginService
+// --- DTOs para Comunicación con Microservicios ---
+
+// Respuesta del LoginService
 export interface LoginResponse {
-  success: boolean; // Tu backend devuelve un mapa
+  success: boolean; 
   message: string;
   token?: string;
   user?: User;
 }
 
-// DTO para request al CheckoutService
+// Item del carrito para enviar al CheckoutService
+export interface CartItemDto {
+  productId: number;
+  qty: number;       // @JsonProperty("qty") en Java
+  precio: number;    // Backend espera 'precio'
+  nombre: string;    // Útil para el historial o recibo
+  tipo: string;      // "Producto" o "Plan"
+}
+
+// Request principal al CheckoutService
 export interface CheckoutRequest {
-  userEmail: string; // <--- CAMBIO: Antes era 'email', ahora debe ser 'userEmail' para coincidir con Java
+  userEmail: string; // IMPORTANTE: Java espera 'userEmail', no 'email'
   items: CartItemDto[];
   totalAmount: number;
 }
 
-export interface CartItemDto {
-  productId: number;
-  qty: number;      // Cambiado de 'quantity' a 'qty' (Backend usa @JsonProperty("qty"))
-  precio: number;   // Cambiado de 'price' a 'precio' (Backend espera 'precio')
-  nombre: string;   // Aseguramos que también se envíe si el backend lo usa
-  tipo: string;     // Aseguramos el tipo (plan/merch)
-}
+// --- Tipos Internos del Frontend ---
 
-// Tipos del Frontend
+// Estructura del ítem en el carrito local (localStorage)
 export interface CartItem {
   id: number;
   nombre: string;
   precio: number;
   qty: number;
   img?: string;
+  tipo?: string;
 }
 
+// Usuario guardado en Session (localStorage)
 export interface SessionUser {
   nombre: string;
   email: string;
@@ -72,14 +85,25 @@ export interface SessionUser {
   token?: string;
 }
 
+// Interfaz auxiliar para productos guardados en el localStorage antiguo (Admin viejo)
+// Esto evita errores en data/products.ts
+export interface SavedProduct {
+    id: string | number;
+    nombre: string;
+    precio: string | number;
+    img: string;
+    desc?: string;
+    codigo?: string;
+}
 
+// --- Entrenadores y Reservas (Trainers & Bookings) ---
 
 export interface Trainer {
   id: number;
   nombre: string;
   especialidad: string;
   email: string;
-  photoUrl?: string; // En Java lo llamaste 'photoUrl'
+  photoUrl?: string; // Coincide con 'photoUrl' en Java
 }
 
 export interface Booking {
@@ -89,6 +113,8 @@ export interface Booking {
   dateTime: string; // ISO Date string
   status?: string;
 }
+
+// --- Asistencia (Attendance) ---
 
 export interface AttendanceRecord {
   id?: number;

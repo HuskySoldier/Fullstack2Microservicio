@@ -1,114 +1,141 @@
-// src/tienda/js/products.ts
 
-import { $ } from './utils/dom';
-import { API_URLS } from './config';
-import { Product } from './types';
-import { addToCart } from './cart';
-import { CLP } from './utils/format';
 
-// --- 1. Catálogo de Productos ---
+import { $ } from './utils/dom'; 
+import { SessionUser, Blog } from './types';
 
-// Renombramos o creamos un alias para que coincida con lo que busca app.ts
-export async function renderProductsPage(): Promise<void> {
-  const container = $<HTMLDivElement>("#products-container");
-  if (!container) return;
+// Importaciones de módulos funcionales
+import { renderCart, clearCart, checkout } from './cart';
+import { initAuth, logoutUser } from './auth'; 
+import { BLOGS } from './data/blogs'; 
+import { renderHomePlans, renderProductsPage, renderDetailPage } from './products';
+import { loadTrainers } from './trainers'; // Agregado para mantener la funcionalidad de "Nosotros"
 
-  container.innerHTML = "<p>Cargando productos...</p>";
+// ---- 1. Lógica de UI General (Header y Navegación) ----
 
-  try {
-    const response = await fetch(API_URLS.PRODUCTS); 
-    if (!response.ok) throw new Error("Error cargando productos");
-    
-    const products: Product[] = await response.json();
+function updateHeader(): void {
+  const nav = $<HTMLDivElement>('.header .nav'); 
+  if (!nav) return;
 
-    if (products.length === 0) {
-        container.innerHTML = "<p>No hay productos disponibles.</p>";
-        return;
+  // Determinar ruta para el link de Admin dependiendo de dónde estemos
+  const inPages = location.pathname.includes('/tienda/pages/');
+  const adminHref = inPages ? '../../admin/index.html' : '../admin/index.html';
+
+  // Obtener sesión
+  const session: SessionUser | null = JSON.parse(localStorage.getItem('session_user') || 'null');
+
+  // Limpiar elementos dinámicos previos
+  nav.querySelectorAll('[data-dyn]').forEach(el => el.remove());
+
+  if (session) {
+    // 1. Mensaje de bienvenida
+    const hello = document.createElement('span');
+    hello.className = 'badge';
+    hello.textContent = `Hola, ${session.nombre || 'Usuario'}`;
+    hello.style.marginRight = '10px';
+    hello.setAttribute('data-dyn', '1');
+    nav.appendChild(hello);
+
+    // 2. Link Admin (Solo si corresponde)
+    if (session.rol === 'Administrador' || session.rol === 'Vendedor') {
+      const aAdmin = document.createElement('a');
+      aAdmin.href = adminHref;
+      aAdmin.textContent = 'Admin';
+      aAdmin.setAttribute('data-dyn', '1');
+      nav.appendChild(aAdmin);
     }
 
-    renderProductList(products, container);
-  } catch (error) {
-    console.error(error);
-    container.innerHTML = "<p>Error de conexión con el catálogo.</p>";
+    // 3. Botón Logout
+    const aOut = document.createElement('a');
+    aOut.href = '#';
+    aOut.textContent = 'Cerrar sesión';
+    aOut.onclick = (e: MouseEvent) => { 
+      e.preventDefault(); 
+      logoutUser(); 
+    };
+    aOut.setAttribute('data-dyn', '1');
+    nav.appendChild(aOut);
+
+    // 4. Ocultar Login/Registro si ya está logueado
+    nav.querySelectorAll('a').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (/registro\.html|login\.html/i.test(href)) {
+        a.style.display = 'none';
+      }
+    });
   }
 }
 
-function renderProductList(products: Product[], container: HTMLElement) {
-  container.innerHTML = products.map(p => `
-    <div class="product-card">
-      <img src="../assets/${p.img || 'default.png'}" alt="${p.nombre}">
-      <h3>${p.nombre}</h3>
-      <p class="price">${CLP(p.precio)}</p>
-      <button class="add-btn" data-id="${p.id}">Añadir</button>
-    </div>
+// ---- 2. Lógica de Blogs ----
+
+function renderBlogsList(): void {
+  const cont = $('#blog-list');
+  if (!cont) return;
+
+  cont.innerHTML = BLOGS.map((b: Blog) => `
+    <article class="card">
+      <img src="${b.img}" alt="${b.titulo}" class="prod-img" style="width:100%; height:150px; object-fit:cover;">
+      <h3>${b.titulo}</h3>
+      <p>${b.resumen}</p>
+      <a href="blog-detalle.html?id=${b.id}" class="btn" style="margin-top:10px; display:inline-block;">Leer más</a>
+    </article>
   `).join("");
-
-  // Asignar eventos a los botones
-  container.querySelectorAll('.add-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-          const id = parseInt((e.target as HTMLElement).dataset.id || "0");
-          if(id) addToCart(id);
-      });
-  });
 }
 
-// --- 2. Detalle de Producto ---
+function renderBlogDetail(): void {
+  const cont = $('#blog-detail');
+  if (!cont) return;
 
-export async function renderDetailPage(): Promise<void> {
-    const container = $<HTMLDivElement>("#product-detail");
-    if (!container) return;
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  const b = BLOGS.find((x: Blog) => x.id === id); 
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
+  if (!b) { 
+    cont.innerHTML = "<p>Artículo no encontrado</p>"; 
+    return; 
+  }
 
-    if (!id) {
-        container.innerHTML = "<p>Producto no especificado</p>";
-        return;
-    }
-
-    try {
-        // Asumimos que tu backend tiene un endpoint para obtener un producto por ID
-        // Si no lo tiene, tendrás que filtrar la lista completa de productos.
-        const response = await fetch(`${API_URLS.PRODUCTS}/${id}`);
-        
-        if (!response.ok) throw new Error("Producto no encontrado");
-
-        const p: Product = await response.json();
-
-        container.innerHTML = `
-            <div class="detail-grid" style="display:flex; gap:20px; align-items:center;">
-                <img src="../assets/${p.img || 'default.png'}" alt="${p.nombre}" style="max-width:300px; border-radius:8px;">
-                <div class="info">
-                    <h2>${p.nombre}</h2>
-                    <h3 class="price" style="color:#e63946; margin:10px 0;">${CLP(p.precio)}</h3>
-                    <br>
-                    <button class="btn primary add-btn-detail" data-id="${p.id}">Agregar al Carrito</button>
-                    <a href="productos.html" class="btn secondary">Volver</a>
-                </div>
-            </div>
-        `;
-        
-        const btn = container.querySelector('.add-btn-detail');
-        if(btn) {
-            btn.addEventListener('click', () => {
-                addToCart(p.id);
-                alert("Producto agregado al carrito");
-            });
-        }
-
-    } catch (error) {
-        console.error(error);
-        container.innerHTML = "<p>Error al cargar el detalle del producto.</p>";
-    }
+  cont.innerHTML = `
+    <article>
+      <img src="${b.img}" alt="${b.titulo}" style="max-width:100%; height:300px; object-fit:cover; border-radius:8px;">
+      <h2 style="margin-top:20px;">${b.titulo}</h2>
+      <p style="color:#666; font-style:italic;"><small>${b.fecha} | Por: ${b.autor}</small></p>
+      <hr style="margin: 20px 0; border:0; border-top:1px solid #eee;">
+      <div style="line-height:1.6;">${b.contenido}</div>
+      <br>
+      <a href="blogs.html" class="btn">Volver a Blogs</a>
+    </article>
+  `;
 }
 
-// --- 3. Planes del Home (Placeholder) ---
+// ---- 3. Inicialización Principal ----
 
-export function renderHomePlans(): void {
-    // Si tienes lógica específica para el home, agrégala aquí.
-    // Si no, déjala vacía para evitar el error de importación.
-    const container = $("#plans-container");
-    if(container) {
-        // Lógica para renderizar planes si es necesario
-    }
-}
+window.addEventListener('DOMContentLoaded', () => {
+  // Footer año actual
+  const y = $('#year');
+  if (y) y.textContent = new Date().getFullYear().toString();
+
+  // Inicializar Módulos
+  renderHomePlans();    // Home
+  renderProductsPage(); // Catálogo
+  renderDetailPage();   // Detalle Producto
+  renderBlogsList();    // Lista Blogs
+  renderBlogDetail();   // Detalle Blog
+  loadTrainers();       // Cargar entrenadores (Nosotros)
+  
+  renderCart();         // Renderizar estado inicial del carrito
+  initAuth();           // Event listeners para Login/Registro
+
+  // Event listeners del Carrito (Botones globales)
+  const btnClear = $<HTMLButtonElement>('#btn-clear-cart');
+  const btnCheckout = $<HTMLButtonElement>('#btn-checkout');
+
+  if (btnClear) {
+    btnClear.addEventListener('click', clearCart);
+  }
+  if (btnCheckout) {
+    btnCheckout.addEventListener('click', checkout);
+  }
+
+  // Actualizar Header (Usuario logueado)
+  updateHeader();
+});
