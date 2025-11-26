@@ -1,8 +1,6 @@
-// src/tienda/js/auth.ts
-
 import { $ } from './utils/dom';
 import { SessionUser, LoginResponse } from './types';
-import { API_URLS } from './config'; // Asegúrate de tener este archivo creado
+import { API_URLS } from './config'; 
 
 // --- Función Principal (Exportada) ---
 export function initAuth(): void {
@@ -19,8 +17,8 @@ export function initAuth(): void {
   const fLog = $<HTMLFormElement>("#form-login");
   if (fLog) {
     fLog.addEventListener("submit", (e: SubmitEvent) => {
-      e.preventDefault(); // Evita recarga
-      loginUser();        // Llama al backend
+      e.preventDefault(); // Esto es lo que evita que salga ?email=... en la URL
+      loginUser();        
     });
   }
 }
@@ -39,7 +37,7 @@ function resolveTiendaIndex(): string {
   return '/tienda/index.html';
 }
 
-// 1. REGISTRO (Ya lo tenías funcionando)
+// 1. REGISTRO
 async function registerUser(): Promise<void> {
   const nombreInput = $<HTMLInputElement>("#reg-nombre");
   const emailInput = $<HTMLInputElement>("#reg-email");
@@ -74,7 +72,7 @@ async function registerUser(): Promise<void> {
   }
 }
 
-// 2. LOGIN (Conectado al Microservicio)
+// 2. LOGIN
 async function loginUser(): Promise<void> {
   const emailInput = $<HTMLInputElement>("#log-email");
   const passInput = $<HTMLInputElement>("#log-pass");
@@ -87,31 +85,28 @@ async function loginUser(): Promise<void> {
   };
 
   try {
-    // Llamada al LoginController (Puerto 8083)
     const response = await fetch(API_URLS.LOGIN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
 
-    // Parseamos la respuesta como JSON
     const data: LoginResponse = await response.json();
 
     if (response.ok && data.success) {
-      // El backend devuelve el usuario dentro de 'user' o 'userProfile' según tu DTO
-      // Adaptamos la sesión para el frontend
       const sessionUser: SessionUser = {
         nombre: data.user?.nombre || "Usuario",
         email: data.user?.email || requestBody.email,
         rol: data.user?.rol || "Cliente",
-        token: data.token // Guardamos el token si lo necesitas para futuras peticiones
+        token: data.token 
       };
 
-      // Guardar sesión en navegador
       localStorage.setItem("session_user", JSON.stringify(sessionUser));
 
       alert(`Bienvenido ${sessionUser.nombre}`);
-      window.location.href = "../index.html"; 
+      
+      // Redirección corregida usando la función auxiliar
+      window.location.href = resolveTiendaIndex(); 
     } else {
       alert(data.message || "Credenciales incorrectas");
     }
