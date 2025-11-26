@@ -23,25 +23,37 @@ export interface Product {
   features?: string[]; // Asegúrate que el backend envíe esto o manéjalo opcional
 }
 
+export interface Blog {
+  id: string;
+  titulo: string;
+  autor: string;
+  fecha: string;
+  resumen: string;
+  contenido: string;
+  img: string;
+}
+
 // DTO para respuesta del LoginService
 export interface LoginResponse {
-  success: boolean;
+  success: boolean; // Tu backend devuelve un mapa
   message: string;
-  token?: string; // Si usas JWT
+  token?: string;
   user?: User;
 }
 
 // DTO para request al CheckoutService
 export interface CheckoutRequest {
-  email: string;
+  userEmail: string; // <--- CAMBIO: Antes era 'email', ahora debe ser 'userEmail' para coincidir con Java
   items: CartItemDto[];
   totalAmount: number;
 }
 
 export interface CartItemDto {
   productId: number;
-  quantity: number;
-  price: number;
+  qty: number;      // Cambiado de 'quantity' a 'qty' (Backend usa @JsonProperty("qty"))
+  precio: number;   // Cambiado de 'price' a 'precio' (Backend espera 'precio')
+  nombre: string;   // Aseguramos que también se envíe si el backend lo usa
+  tipo: string;     // Aseguramos el tipo (plan/merch)
 }
 
 // Tipos del Frontend
@@ -58,4 +70,29 @@ export interface SessionUser {
   email: string;
   rol: string;
   token?: string;
+}
+
+
+
+export interface Trainer {
+  id: number;
+  nombre: string;
+  especialidad: string;
+  email: string;
+  photoUrl?: string; // En Java lo llamaste 'photoUrl'
+}
+
+export interface Booking {
+  id?: number;
+  userEmail: string;
+  trainerId: number;
+  dateTime: string; // ISO Date string
+  status?: string;
+}
+
+export interface AttendanceRecord {
+  id?: number;
+  userEmail: string;
+  checkInTime: string;
+  sedeId: number;
 }

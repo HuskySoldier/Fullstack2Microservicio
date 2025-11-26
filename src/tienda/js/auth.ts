@@ -16,11 +16,11 @@ export function initAuth(): void {
   }
 
   // Conectar formulario de Login
-  const fLog = $<HTMLFormElement>("#form-login"); 
+  const fLog = $<HTMLFormElement>("#form-login");
   if (fLog) {
     fLog.addEventListener("submit", (e: SubmitEvent) => {
-      e.preventDefault();
-      loginUser();
+      e.preventDefault(); // Evita recarga
+      loginUser();        // Llama al backend
     });
   }
 }

@@ -126,12 +126,15 @@ export async function checkout(): Promise<void> {
 
   // Construir el Request Body para CheckoutController
   const checkoutRequest: CheckoutRequest = {
-    email: session.email,
+    userEmail: session.email,
     totalAmount: total,
     items: cart.map(item => ({
       productId: item.id,
-      quantity: item.qty,
-      price: item.precio
+      // CORRECCIÓN: Usar las claves que espera Java
+      qty: item.qty,         // Coincide con @JsonProperty("qty") en CartItemDto.java
+      precio: item.precio,   // Coincide con el campo 'precio' en CartItemDto.java
+      nombre: item.nombre,   // Es útil pasar el nombre para el historial
+      tipo: "merch"          // Opcional: definir lógica si tienes items que no son productos físicos
     }))
   };
 
