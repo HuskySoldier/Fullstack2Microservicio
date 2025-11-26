@@ -5,16 +5,23 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [react()],
   
-  // CORRECCIÓN 1: Apuntar directamente a la carpeta 'tienda' relativa a este archivo
+  // 1. La raíz del servidor web sigue siendo 'tienda' (donde está tu index.html)
   root: resolve(__dirname, 'tienda'), 
   
+  // 2. CORRECCIÓN CLAVE: Mapear la ruta '/src' a la carpeta real del sistema
+  resolve: {
+    alias: {
+      '/src': resolve(__dirname, 'src')
+    }
+  },
+
   build: {
-    // La salida sube un nivel (..) para no quedar dentro de 'tienda/dist'
+    // La salida se genera en la carpeta 'dist' del proyecto principal
     outDir: resolve(__dirname, 'dist'),
-    emptyOutDir: true, // Limpia la carpeta dist antes de construir
+    emptyOutDir: true,
     rollupOptions: {
       input: {
-        // CORRECCIÓN 2: Rutas simplificadas para las páginas
+        // Declarar todas tus páginas HTML aquí
         main: resolve(__dirname, 'tienda/index.html'),
         productos: resolve(__dirname, 'tienda/pages/productos.html'),
         login: resolve(__dirname, 'tienda/pages/login.html'),
@@ -29,7 +36,7 @@ export default defineConfig({
   },
   server: { 
     fs: {
-      // Permite importar archivos fuera de la carpeta 'tienda' (como node_modules o src)
+      // Permitir servir archivos que están fuera de 'tienda' (como src y node_modules)
       allow: ['..'] 
     }
   }

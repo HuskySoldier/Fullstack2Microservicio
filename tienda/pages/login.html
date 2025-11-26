@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login | GymTastic</title>
+  <title>Iniciar Sesión | GymTastic</title>
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
@@ -23,28 +23,28 @@
       <a href="carrito.html">Carrito</a>
     </nav>
   </header>
-  
-<main class="container section">
-  <header class="section-header">
-    <h2>Login</h2>
-    <p>Ingresa a tu cuenta.</p>
-  </header>
 
-  <form id="form-login" class="forms-grid" novalidate onsubmit="return loginUser()">
-    <div class="field">
-      <label>Correo</label>
-      <input id="log-email" name="email" required>
-      <small class="error"></small>
-    </div>
-    <div class="field">
-      <label>Contraseña</label>
-      <input id="log-pass" name="password" type="password" required minlength="4" maxlength="10">
-      <small class="error"></small>
-    </div>
-    <button class="btn primary" type="submit">Ingresar</button>
-  </form>
-</main>
+  <main class="container section">
+    <header class="section-header">
+      <h2>Iniciar Sesión</h2>
+      <p>Ingresa a tu cuenta.</p>
+    </header>
 
+    <form id="form-login" class="forms-grid" novalidate>
+      <div class="field">
+        <label>Correo</label>
+        <input id="log-email" name="email" type="email" required>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input id="log-pass" name="password" type="password" required>
+      </div>
+      <button class="btn primary" type="submit">Ingresar</button>
+      <p style="margin-top: 1rem; text-align: center;">
+        <a href="registro.html">¿No tienes cuenta? Regístrate aquí</a>
+      </p>
+    </form>
+  </main>
 
   <footer class="footer">
     <div class="container footer-grid">
@@ -52,15 +52,7 @@
       <div class="footer-links"><a href="#">Términos</a> • <a href="#">Privacidad</a></div>
     </div>
   </footer>
-  <script src="../js/utils/format.js"></script>
-  <script src="../js/utils/dom.js"></script>
-  <script src="../js/data/products.js"></script>
-  <script src="../js/data/blogs.js"></script>
-  <script src="../js/validators.js"></script>
-  <script src="../js/cart.js"></script>
-  <script src="../js/auth.js"></script>
-  <script src="../js/products.js"></script>
-  <script src="../js/utils/modal.js"></script>
-  <script src="../js/app.js"></script>
+
+  <script type="module" src="../../src/tienda/js/app.ts"></script>
 </body>
 </html>
