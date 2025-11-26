@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Productos | Admin</title>
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="aside">
+      <a class="brand" href="../index.html">
+        <img src="../assets/logo.svg" alt="Logo" width="28" height="28"/>
+        <span>GymTastic Admin</span>
+      </a>
+      <nav>
+        <a href="../index.html">Dashboard</a>
+        <a class="active" href="productos.html">Productos</a>
+        <a href="usuarios.html">Usuarios</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <h1>Productos</h1>
+      <div class="grid">
+        <!-- Listado de productos -->
+        <article class="card">
+          <h3>Listado</h3>
+          <table class="table" id="tbl-productos">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </article>
+
+        <!-- Formulario -->
+        <article class="card">
+          <h3>Nuevo / Editar</h3>
+          <form id="frm-producto" class="form">
+            <input type="hidden" id="p-index" />
+            <div class="field">
+              <label>Código</label>
+              <input id="p-codigo" required minlength="3">
+            </div>
+            <div class="field">
+              <label>Nombre</label>
+              <input id="p-nombre" required maxlength="100">
+            </div>
+            <div class="field">
+              <label>Descripción</label>
+              <textarea id="p-desc" maxlength="500"></textarea>
+            </div>
+            <div class="field">
+              <label>Precio</label>
+              <input id="p-precio" type="number" min="0" step="0.01" required>
+            </div>
+            <div class="field">
+              <label>Stock</label>
+              <input id="p-stock" type="number" min="0" step="1" required>
+            </div>
+            <div class="field">
+              <label>Categoría</label>
+              <select id="p-cat" required>
+                <option value="">Seleccionar</option>
+                <option value="plan">Plan</option>
+                <option value="accesorio">Accesorio</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Imagen (URL opcional)</label>
+              <input id="p-img" type="url">
+            </div>
+            <div class="actions">
+              <button class="btn primary" type="submit">Guardar</button>
+              <button class="btn" type="button" id="btn-limpiar">Limpiar</button>
+            </div>
+          </form>
+        </article>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/validators.js"></script>
+  <script>
+    // ---------------- Admin Products ----------------
+    const PRODS_KEY = "PRODUCTS";
+
+    function getProducts(){ return JSON.parse(localStorage.getItem(PRODS_KEY) || "[]"); }
+    function setProducts(arr){ localStorage.setItem(PRODS_KEY, JSON.stringify(arr)); }
+
+    function renderProducts(){
+      const tb = document.querySelector("#tbl-productos tbody");
+      if(!tb) return;
+
+      const productos = getProducts();
+
+      if(productos.length === 0){
+        tb.innerHTML = "<tr><td colspan='6'>No hay productos registrados</td></tr>";
+        return;
+      }
+
+      tb.innerHTML = productos.map((p, idx) => `
+        <tr>
+          <td>${p.id || "-"}</td>
+          <td>${p.nombre || "-"}</td>
+          <td>${(p.precio || 0).toLocaleString("es-CL",{style:"currency",currency:"CLP"})}</td>
+          <td>${p.stock ?? "-"}</td>
+          <td>${p.categoria || (p.features ? "plan" : "-")}</td>
+          <td>
+            <button class="btn" onclick="editProd(${idx})">Editar</button>
+            <button class="btn danger" onclick="deleteProd(${idx})">Eliminar</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function saveProdForm(){
+      const idx = document.getElementById("p-index").value;
+      const id = document.getElementById("p-codigo").value.trim();
+      const nombre = document.getElementById("p-nombre").value.trim();
+      const desc = document.getElementById("p-desc").value.trim();
+      const precio = parseFloat(document.getElementById("p-precio").value);
+      const stock = parseInt(document.getElementById("p-stock").value);
+      const categoria = document.getElementById("p-cat").value;
+      const img = document.getElementById("p-img").value.trim();
+
+      if(!id || !nombre || isNaN(precio) || precio < 0){
+        alert("Revisa los campos obligatorios");
+        return;
+      }
+
+      let productos = getProducts();
+      const obj = { id, nombre, precio, stock, categoria, img, features:[desc || "Plan personalizado"] };
+
+      if(idx){ // editar
+        productos[idx] = {...productos[idx], ...obj};
+      } else { // nuevo
+        if(productos.find(p => p.id === id)){
+          alert("Ya existe un producto con ese código");
+          return;
+        }
+        productos.push(obj);
+      }
+
+      setProducts(productos);
+      renderProducts();
+      document.getElementById("frm-producto").reset();
+      document.getElementById("p-index").value = "";
+    }
+
+    function editProd(idx){
+      const p = getProducts()[idx];
+      if(!p) return;
+      document.getElementById("p-index").value = idx;
+      document.getElementById("p-codigo").value = p.id || "";
+      document.getElementById("p-nombre").value = p.nombre || "";
+      document.getElementById("p-desc").value = (p.features && p.features[0]) || "";
+      document.getElementById("p-precio").value = p.precio || 0;
+      document.getElementById("p-stock").value = p.stock || 0;
+      document.getElementById("p-cat").value = p.categoria || "";
+      document.getElementById("p-img").value = p.img || "";
+    }
+
+    function deleteProd(idx){
+      if(!confirm("¿Eliminar este producto?")) return;
+      let productos = getProducts();
+      productos.splice(idx, 1);
+      setProducts(productos);
+      renderProducts();
+    }
+
+    // ---------------- Init ----------------
+    document.addEventListener("DOMContentLoaded", ()=>{
+      renderProducts();
+
+      document.getElementById("frm-producto").addEventListener("submit", e=>{
+        e.preventDefault();
+        saveProdForm();
+      });
+
+      document.getElementById("btn-limpiar").addEventListener("click", ()=>{
+        document.getElementById("frm-producto").reset();
+        document.getElementById("p-index").value = "";
+      });
+    });
+  </script>
+</body>
+</html>

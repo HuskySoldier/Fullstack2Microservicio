@@ -1,0 +1,104 @@
+
+@import url('../tienda/css/styles.css'); /* importa fuentes y reseteo básico */
+:root{
+  --bg:#0b0e14; --card:#121826; --muted:#8892a6; --text:#e6ebff; --primary:#4f8cff; --accent:#00d18f; --border:#233149;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  padding:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif
+}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.aside{
+  background:#0e1422;
+  border-right:1px solid var(--border);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  position:sticky;
+  top:0;
+  height:100vh
+}
+.aside .brand{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  text-decoration:none;
+  color:var(--text);
+  font-weight:700
+}
+.aside nav a{
+  display:block;
+  padding:10px 12px;
+  border-radius:10px;
+  color:var(--muted);
+  text-decoration:none
+}
+.aside nav a:hover,.aside nav a.active{background:#141a28;color:var(--text)}
+.main{padding:24px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px
+}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  display:block;         
+  overflow-x:auto;
+  white-space:nowrap;
+}
+.table th,.table td{
+  border-bottom:1px solid var(--border);
+  padding:10px;
+  text-align:left
+}
+/*  asegura que la columna de acciones siempre tenga espacio */
+.table th:last-child,
+.table td:last-child{
+  min-width:140px;
+  white-space:nowrap;
+}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+input,select,textarea{
+  background:#0e1524;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  outline:none
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid var(--border);
+  padding:10px 14px;
+  border-radius:12px;
+  text-decoration:none;
+  color:var(--text);
+  background:#0e1524;
+  cursor:pointer
+}
+.btn.primary{background:var(--primary);border-color:transparent;color:white;font-weight:700}
+.btn.subtle{background:#0d1320}
+.btn.danger{background:#ff6b6b;border-color:transparent;color:#fff;font-weight:700}
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  color:var(--muted);
+  font-size:.8rem
+}
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .layout{grid-template-columns:1fr}
+  .aside{position:relative;height:auto}
+}

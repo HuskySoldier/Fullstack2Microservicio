@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuarios | Admin</title>
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="aside">
+      <a class="brand" href="../index.html">
+        <img src="../assets/logo.svg" alt="Logo" width="28" height="28"/>
+        <span>GymTastic Admin</span>
+      </a>
+      <nav>
+        <a href="../index.html">Dashboard</a>
+        <a href="productos.html">Productos</a>
+        <a class="active" href="usuarios.html">Usuarios</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <h1>Usuarios</h1>
+      <div class="grid">
+        <!-- Listado -->
+        <article class="card">
+          <h3>Listado</h3>
+          <table class="table" id="tbl-usuarios">
+            <thead>
+              <tr>
+                <th>RUN</th>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Región/Comuna</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </article>
+
+        <!-- Formulario -->
+        <article class="card">
+          <h3>Nuevo / Editar</h3>
+          <form id="frm-usuario" class="form">
+            <!-- index oculto -->
+            <input type="hidden" id="u-index" />
+            
+            <div class="field">
+              <label>RUN (sin puntos ni guion)</label>
+              <input id="u-run" minlength="7" maxlength="9" placeholder="19011022K">
+            </div>
+            <div class="field">
+              <label>Nombre</label>
+              <input id="u-nombre" required maxlength="50">
+            </div>
+            <div class="field">
+              <label>Apellidos</label>
+              <input id="u-apellidos" maxlength="100">
+            </div>
+            <div class="field">
+              <label>Correo</label>
+              <input id="u-email" required maxlength="100" placeholder="usuario@duoc.cl">
+            </div>
+            <div class="field">
+              <label>Fecha Nacimiento (opcional)</label>
+              <input id="u-fnac" type="date">
+            </div>
+            <div class="field">
+              <label>Rol</label>
+              <select id="u-rol" required>
+                <option value="">Seleccionar</option>
+                <option>Administrador</option>
+                <option>Vendedor</option>
+                <option>Cliente</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Región</label>
+              <select id="u-region"></select>
+            </div>
+            <div class="field">
+              <label>Comuna</label>
+              <select id="u-comuna"></select>
+            </div>
+            <div class="field">
+              <label>Dirección</label>
+              <input id="u-dir" maxlength="300">
+            </div>
+            <div class="actions">
+              <button class="btn primary" type="submit">Guardar</button>
+              <button class="btn" type="button" id="btn-limpiar-u">Limpiar</button>
+            </div>
+          </form>
+        </article>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/data/regions.js"></script>
+  <script src="../js/validators.js"></script>
+  <script>
+    // ---------------- Admin Users ----------------
+    const USERS_KEY = "users";
+
+    function getUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); }
+    function setUsers(arr){ localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
+
+    function renderUsers(){
+      const tb = document.querySelector("#tbl-usuarios tbody");
+      if(!tb) return;
+
+      const users = getUsers();
+
+      if(users.length === 0){
+        tb.innerHTML = "<tr><td colspan='7'>No hay usuarios registrados</td></tr>";
+        return;
+      }
+
+      tb.innerHTML = users.map((u, idx) => `
+        <tr>
+          <td>${u.run || "-"}</td>
+          <td>${u.nombre || "-"}</td>
+          <td>${u.apellidos || "-"}</td>
+          <td>${u.email}</td>
+          <td>${u.rol}</td>
+          <td>${u.region || ""}/${u.comuna || ""}</td>
+          <td>
+            <button class="btn" onclick="editUser(${idx})">Editar</button>
+            <button class="btn danger" onclick="deleteUser(${idx})">Eliminar</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function saveUserForm(){
+      const idx = document.getElementById("u-index").value;
+      const run = document.getElementById("u-run").value.trim().toUpperCase();
+      const nombre = document.getElementById("u-nombre").value.trim();
+      const apellidos = document.getElementById("u-apellidos").value.trim();
+      const email = document.getElementById("u-email").value.trim();
+      const fnac = document.getElementById("u-fnac").value;
+      const rol = document.getElementById("u-rol").value;
+      const region = document.getElementById("u-region").value;
+      const comuna = document.getElementById("u-comuna").value;
+      const dir = document.getElementById("u-dir").value.trim();
+
+      if(!nombre || !email || !rol){
+        alert("Faltan campos obligatorios");
+        return;
+      }
+
+      let users = getUsers();
+      const obj = { run, nombre, apellidos, email, fnac, rol, region, comuna, dir, pass: "" };
+
+      if(idx){ // editar
+        users[idx] = {...users[idx], ...obj};
+      } else { // nuevo
+        if(users.find(u => u.email === email)){
+          alert("Ya existe un usuario con ese correo");
+          return;
+        }
+        users.push(obj);
+      }
+
+      setUsers(users);
+      renderUsers();
+      document.getElementById("frm-usuario").reset();
+      document.getElementById("u-index").value = "";
+    }
+
+    function editUser(idx){
+      const u = getUsers()[idx];
+      if(!u) return;
+      document.getElementById("u-index").value = idx;
+      document.getElementById("u-run").value = u.run || "";
+      document.getElementById("u-nombre").value = u.nombre || "";
+      document.getElementById("u-apellidos").value = u.apellidos || "";
+      document.getElementById("u-email").value = u.email || "";
+      document.getElementById("u-fnac").value = u.fnac || "";
+      document.getElementById("u-rol").value = u.rol || "";
+      document.getElementById("u-region").value = u.region || "";
+      document.getElementById("u-comuna").value = u.comuna || "";
+      document.getElementById("u-dir").value = u.dir || "";
+    }
+
+    function deleteUser(idx){
+      if(!confirm("¿Eliminar este usuario?")) return;
+      let users = getUsers();
+      users.splice(idx, 1);
+      setUsers(users);
+      renderUsers();
+    }
+
+    // ---------------- Init ----------------
+    document.addEventListener("DOMContentLoaded", ()=>{
+      renderUsers();
+
+      document.getElementById("frm-usuario").addEventListener("submit", e=>{
+        e.preventDefault();
+        saveUserForm();
+      });
+
+      document.getElementById("btn-limpiar-u").addEventListener("click", ()=>{
+        document.getElementById("frm-usuario").reset();
+        document.getElementById("u-index").value = "";
+      });
+    });
+  </script>
+</body>
+</html>

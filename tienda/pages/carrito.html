@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito | GymTastic</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="container header">
+    <a class="brand" href="../index.html">
+      <img src="../assets/logo.svg" alt="Logo"/>
+      <span>GymTastic</span>
+    </a>
+    <nav class="nav">
+      <a href="../index.html">Inicio</a>
+      <a href="productos.html">Productos</a>
+      <a href="registro.html">Registro</a>
+      <a href="login.html">Login</a>
+      <a href="nosotros.html">Nosotros</a>
+      <a href="blogs.html">Blogs</a>
+      <a href="contacto.html">Contacto</a>
+      <a href="carrito.html" class="active">Carrito</a>
+    </nav>
+  </header>
+  
+  <!-- MAIN -->
+  <main class="container section">
+    <header class="section-header"><h2>Carrito</h2></header>
+    <div class="card">
+      <!-- Aquí renderizamos los items del carrito -->
+      <div id="cart-list" class="list"></div>
+      <!-- Total -->
+      <div class="list-row">
+        <strong>Total</strong>
+        <strong id="cart-total">$0</strong>
+      </div>
+      <!-- Botones -->
+      <div class="actions">
+        <button id="btn-clear-cart">Vaciar Carrito</button>
+        <button id="btn-checkout">Pagar</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <p>© <span id="year"></span> GymTastic.</p>
+      <div class="footer-links"><a href="#">Términos</a> • <a href="#">Privacidad</a></div>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script src="../js/utils/format.js"></script>
+  <script src="../js/utils/dom.js"></script>
+  <script src="../js/data/products.js"></script>
+  <script src="../js/data/blogs.js"></script>
+  <script src="../js/validators.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/products.js"></script>
+  <script src="../js/utils/modal.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    // Renderizamos el carrito al cargar la página
+    renderCart();
+    // Año dinámico
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
