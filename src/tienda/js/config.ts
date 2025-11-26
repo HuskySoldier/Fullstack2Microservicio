@@ -1,10 +1,10 @@
 export const API_URLS = {
-  LOGIN: 'http://localhost:8083/auth/login',      
-  REGISTER: 'http://localhost:8084/auth/register', 
-  PRODUCTS: 'http://localhost:8082/products', // ProductService suele ser 8082 o 8081, verifica tu properties
-  CHECKOUT: 'http://localhost:8085/checkout', // CheckoutService es puerto 8085 según tus archivos
-  USERS: 'http://localhost:8081/users',
+  // CORREGIDO: Quitamos "/auth" para coincidir con tus Controllers Java
+  LOGIN: 'http://localhost:8083/login',      
+  REGISTER: 'http://localhost:8084/register', 
   
-  // NUEVO ENDPOINT
+  PRODUCTS: 'http://localhost:8082/products', 
+  CHECKOUT: 'http://localhost:8085/checkout', 
+  USERS: 'http://localhost:8081/users',
   TRAINERS: 'http://localhost:8086/trainers' 
 };
